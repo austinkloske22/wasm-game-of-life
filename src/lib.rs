@@ -2,6 +2,9 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use std::fmt;
+extern crate js_sys;
+extern crate fixedbitset;
+use fixedbitset::FixedBitSet;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -96,17 +99,32 @@ impl Universe {
         self.cells = next;
     }
 
-    pub fn new() -> Universe {
-        let width = 64;
-        let height = 64;
+    pub fn new(dim: u32) -> Universe {
+        let width = dim;
+        let height = dim;
+        let size = (width * height) as usize;
+        let mut cells = FixedBitSet::with_capacity(size);
+
+        for i in 0..size {
+            cells.set(i, i % 2 == 0 || i % 7 == 0);
+        }
 
         let cells = (0..width * height)
             .map(|i| {
+
+                if js_sys::Math::random() < 0.5 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+                /*
                 if i % 2 == 0 || i % 7 == 0 {
                     Cell::Alive
                 } else {
                     Cell::Dead
                 }
+                */
+
             })
             .collect();
 
